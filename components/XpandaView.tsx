@@ -1,6 +1,8 @@
+
 import React from 'react';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from 'recharts';
 import { Layout, Smartphone, Zap, Eye } from 'lucide-react';
+import XpandaComponent from './XpandaComponent';
 
 const data = [
   { subject: 'Performance', A: 120, fullMark: 150 },
@@ -56,6 +58,21 @@ const XpandaView: React.FC = () => {
             <p className="text-slate-400">{feature.desc}</p>
           </div>
         ))}
+      </div>
+
+      {/* New Components Showcase using XpandaComponent */}
+      <div>
+        <h2 className="text-2xl font-bold text-white mb-6">Core Philosophies</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <XpandaComponent 
+            title="Declarative Syntax" 
+            description="Write UI that is predictable and easy to debug. Our API surface is minimal by design, letting you focus on what matters." 
+          />
+          <XpandaComponent 
+            title="Type Safety" 
+            description="Built with strict TypeScript configuration. Catch errors at compile time, not runtime, ensuring robust applications." 
+          />
+        </div>
       </div>
 
       {/* Visualization Section */}

@@ -6,6 +6,7 @@ import XtigerView from './components/XtigerView';
 import ChatBot from './components/ChatBot';
 import StudioView from './components/StudioView';
 import VoiceLounge from './components/VoiceLounge';
+import ConsentModal from './components/ConsentModal';
 import { ViewState, UserProfile, Notification } from './types';
 
 const App: React.FC = () => {
@@ -18,9 +19,19 @@ const App: React.FC = () => {
     preferences: { notifications: true, theme: 'dark' }
   });
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [showConsent, setShowConsent] = useState(false);
 
-  // Simulate fetching notifications on load
+  // Initial Load: Check Consent & Notifications
   useEffect(() => {
+    // Check for existing consent cookie/storage
+    const consent = localStorage.getItem('xrhino_consent_v1');
+    if (!consent) {
+      // Small delay for nicer UX
+      const timer = setTimeout(() => setShowConsent(true), 1000);
+      return () => clearTimeout(timer);
+    }
+
+    // Mock fetching notifications
     setTimeout(() => {
       setNotifications([
         { id: '1', title: 'xpanda v2.5 Beta', message: 'Early access is now open.', timestamp: Date.now(), read: false, type: 'xpanda' },
@@ -28,6 +39,29 @@ const App: React.FC = () => {
       ]);
     }, 1000);
   }, []);
+
+  const handleConsentAccept = async () => {
+    localStorage.setItem('xrhino_consent_v1', 'full');
+    setShowConsent(false);
+    
+    try {
+      // Request microphone access immediately as part of the consent flow
+      // This triggers the browser's native permission prompt
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      
+      // We don't need the stream here, just the permission. Stop tracks immediately.
+      stream.getTracks().forEach(track => track.stop());
+      console.log("Microphone permission granted via consent flow.");
+    } catch (error) {
+      console.warn("Microphone permission denied or dismissed:", error);
+      // We still save the cookie consent, but mic features might need re-prompting later
+    }
+  };
+
+  const handleConsentDecline = () => {
+    localStorage.setItem('xrhino_consent_v1', 'necessary');
+    setShowConsent(false);
+  };
 
   const handleLogin = () => {
     // Mock login
@@ -72,7 +106,14 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-200 selection:bg-indigo-500/30 font-sans">
+    <div className="min-h-screen bg-slate-950 text-slate-200 selection:bg-indigo-500/30 font-sans relative">
+      {showConsent && (
+        <ConsentModal 
+          onAccept={handleConsentAccept} 
+          onDecline={handleConsentDecline} 
+        />
+      )}
+
       <Navbar 
         currentView={currentView} 
         setView={setView} 
